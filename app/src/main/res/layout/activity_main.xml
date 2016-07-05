@@ -13,7 +13,7 @@
         tools:context="com.github.clearable.MainActivity">
 
 
-    <com.github.clearable.ClearableEditText
+    <com.github.library.ClearableEditText
             android:id="@+id/et_account"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
             app:right_drawable_color="?attr/colorAccent"/>
 
 
-    <com.github.clearable.PasswordEditText
+    <com.github.library.PasswordEditText
             android:id="@+id/et_password"
             android:layout_width="240dp"
             android:layout_height="wrap_content"

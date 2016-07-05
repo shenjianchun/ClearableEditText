@@ -1,4 +1,4 @@
-package com.github.clearable;
+package com.github.library;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -18,7 +18,7 @@ import android.widget.EditText;
 
 /**
  * 带有删除按钮的EditText
- * Created by 14110105 on 2016-06-30.
+ * Created by JC on 2016-06-30.
  */
 public class ClearableEditText extends EditText
         implements EditText.OnFocusChangeListener {
