@@ -49,10 +49,6 @@ public class ClearableEditText extends EditText
      * Right Drawable 是否可见
      */
     private boolean mIsClearVisible;
-    /**
-     * 是否正在显示Error
-     */
-    private boolean mErrorShowing;
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int
             defStyleRes) {
@@ -160,9 +156,9 @@ public class ClearableEditText extends EditText
 
     @Override
     public void setError(CharSequence error, Drawable icon) {
-        super.setError(error, icon);
         if (error != null) {
             setClearDrawableVisible(true);
         }
+        super.setError(error, icon);
     }
 }

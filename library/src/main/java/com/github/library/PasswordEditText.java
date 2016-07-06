@@ -7,8 +7,11 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -21,16 +24,16 @@ import android.widget.EditText;
  */
 public class PasswordEditText extends EditText implements EditText.OnFocusChangeListener {
 
-    public static final String TAG = "ClearableEditText";
+    public static final String TAG = "PasswordEditText";
 
     public PasswordEditText(Context context) {
         super(context);
-        init(context, null, 0 , 0);
+        init(context, null, 0, 0);
     }
 
     public PasswordEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs, 0 , 0);
+        init(context, attrs, 0, 0);
     }
 
     public PasswordEditText(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -46,43 +49,79 @@ public class PasswordEditText extends EditText implements EditText.OnFocusChange
     }
 
     private Drawable mRightDrawable;
+    private Drawable mVisibilityOffDrawable;
     /**
      * Right Drawable 是否可见
      */
     private boolean mIsVisible;
-
+    /**
+     * 密码是否可见
+     */
     private boolean mIsShown = false;
 
+    /**
+     * 是否正在显示Error
+     */
+    private boolean mErrorShowing;
+    /**
+     * 初始化时获取到的输入类型
+     */
     private int mDefaultInputType;
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int
             defStyleRes) {
 
-        if (mRightDrawable == null) {
-            Drawable drawables[] = getCompoundDrawables();
-            mRightDrawable = drawables[2]; // Right Drawable;
-        }
+
+        Drawable drawables[] = getCompoundDrawables();
+        mRightDrawable = drawables[2]; // Right Drawable;
 
         final Resources.Theme theme = context.getTheme();
 
         TypedArray a = theme.obtainStyledAttributes(attrs, R.styleable.ClearableEditText,
                 defStyleAttr, defStyleRes);
 
-        int rightDrawableColor = a.getColor(R.styleable.ClearableEditText_right_drawable_color, Color.BLACK);
+        int rightDrawableColor = a.getColor(R.styleable.ClearableEditText_right_drawable_color,
+                Color.BLACK);
 
         a.recycle();
 
         DrawableCompat.setTint(mRightDrawable, rightDrawableColor);
 
+        mVisibilityOffDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable
+                .ic_visibility_off_black, theme);
+        mVisibilityOffDrawable.setBounds(mRightDrawable.getBounds());
         setOnFocusChangeListener(this);
 
+        // 添加TextChangedListener
+        addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.d(TAG, "onTextChanged " + s);
+
+                setDrawableVisible(s.length() > 0);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
         mDefaultInputType = getInputType();
+
+        // 第一次隐藏
+        setDrawableVisible(false);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if (mIsVisible && event.getAction() == MotionEvent.ACTION_UP) {
+        if (!mErrorShowing && mIsVisible && event.getAction() == MotionEvent.ACTION_UP) {
 
             float x = event.getX();
             if (x >= getWidth() - getTotalPaddingRight() && x <= getWidth() - getPaddingRight()) {
@@ -90,7 +129,6 @@ public class PasswordEditText extends EditText implements EditText.OnFocusChange
 
                 showPassword(!mIsShown);
 
-                return true; // 消耗event
             }
 
         }
@@ -99,10 +137,8 @@ public class PasswordEditText extends EditText implements EditText.OnFocusChange
     }
 
 
-    /**
-     * 清空输入框
-     */
     private void showPassword(boolean isShown) {
+        mIsShown = isShown;
 
         int inputType = mDefaultInputType;
         if (isShown) {
@@ -111,7 +147,9 @@ public class PasswordEditText extends EditText implements EditText.OnFocusChange
 
         setInputType(inputType);
 
-        mIsShown = isShown;
+//        setCompoundDrawables(getCompoundDrawables()[0], getCompoundDrawables()[1],
+//                isShown ? mVisibilityOffDrawable: mRightDrawable , getCompoundDrawables()[3]);
+
     }
 
 
@@ -122,38 +160,38 @@ public class PasswordEditText extends EditText implements EditText.OnFocusChange
      */
     public void setDrawableVisible(boolean isVisible) {
 
-        if (mRightDrawable == null) {
-            mRightDrawable = getCompoundDrawables()[2];
-        }
+        Drawable drawable = mIsShown ? mVisibilityOffDrawable : mRightDrawable;
 
         setCompoundDrawables(getCompoundDrawables()[0], getCompoundDrawables()[1],
-                isVisible ? mRightDrawable : null, getCompoundDrawables()[3]);
+                isVisible ? drawable : null, getCompoundDrawables()[3]);
 
         mIsVisible = isVisible;
-
-        Log.d(TAG, "getHeight:" + getHeight());
     }
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
-        Log.d(TAG, "getTotalPaddingTop = " + getTotalPaddingTop());
-        Log.d(TAG, "getExtendedPaddingTop = " + getExtendedPaddingTop());
-
-        if (hasFocus) {
-            if (getText().length() > 0) {
-                setDrawableVisible(true);
+        if (!mErrorShowing) {
+            if (hasFocus) {
+                if (getText().length() > 0) {
+                    setDrawableVisible(true);
+                }
+            } else {
+                setDrawableVisible(false);
             }
-        } else {
-            setDrawableVisible(false);
         }
 
     }
 
     @Override
-    protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
-        super.onTextChanged(text, start, lengthBefore, lengthAfter);
+    public void setError(CharSequence error, Drawable icon) {
 
-        Log.d(TAG, "onTextChanged " + text);
-        setDrawableVisible(text.length() > 0);
+        setDrawableVisible(false);
+
+
+        super.setError(error, icon);
+        // 如果error != null 代表错误提示正在显示，所以要隐藏mClearingDrawable
+        mErrorShowing = error != null;
+//        showPassword(mIsShown);
     }
+
 }

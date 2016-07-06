@@ -28,14 +28,14 @@
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:drawableRight="@drawable/ic_visibility_off_black_24dp"
+            android:drawableRight="@drawable/ic_visibility_black"
             android:hint="请输入密码"/>
 
     <EditText
             android:id="@+id/et_email"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
+            android:drawableRight="@drawable/ic_clear"
             android:hint="请输入邮箱地址"/>
 
     <Button
