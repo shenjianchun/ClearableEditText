@@ -26,7 +26,7 @@ public class ClearableEditText extends EditText
     public static final String TAG = "ClearableEditText";
 
     public ClearableEditText(Context context) {
-       this(context, null);
+        this(context, null);
     }
 
     public ClearableEditText(Context context, AttributeSet attrs) {
@@ -103,7 +103,7 @@ public class ClearableEditText extends EditText
     public boolean onTouchEvent(MotionEvent event) {
 
         // error drawable 不显示 && clear drawable 显示 && action up
-        if (!mErrorShowing && mIsClearVisible && event.getAction() == MotionEvent.ACTION_UP) {
+        if (getError() == null && mIsClearVisible && event.getAction() == MotionEvent.ACTION_UP) {
 
             float x = event.getX();
             if (x >= getWidth() - getTotalPaddingRight() && x <= getWidth() - getPaddingRight()) {
@@ -111,9 +111,7 @@ public class ClearableEditText extends EditText
 
                 clearText();
 
-                return true; // 消耗event
             }
-
         }
 
         return super.onTouchEvent(event);
@@ -149,7 +147,7 @@ public class ClearableEditText extends EditText
         Log.d(TAG, "getExtendedPaddingTop = " + getExtendedPaddingTop());
 
         // error drawable 不显示的时候
-        if (!mErrorShowing) {
+        if (getError() == null) {
             if (hasFocus) {
                 if (getText().length() > 0) {
                     setClearDrawableVisible(true);
@@ -163,7 +161,8 @@ public class ClearableEditText extends EditText
     @Override
     public void setError(CharSequence error, Drawable icon) {
         super.setError(error, icon);
-        // 如果error != null 代表错误提示正在显示，所以要隐藏mClearingDrawable
-        mErrorShowing = error != null;
+        if (error != null) {
+            setClearDrawableVisible(true);
+        }
     }
 }
